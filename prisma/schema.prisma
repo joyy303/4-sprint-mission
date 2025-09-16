@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  nickname  String
+  image     String?
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  articles  Article[]
+  products  Product[]
+  comments  Comment[]
+  likes     Like[]
+}
+
+model Article {
+  id        Int       @id @default(autoincrement())
+  title     String
+  content   String
+  image     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  likes     Like[]
+  comments  Comment[]
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  price       Int
+  tags        String[]
+  images      String[]
+  comments    Comment[]
+  likes       Like[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  User        User?     @relation(fields: [userId], references: [id])
+  userId      Int?
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int?
+  article   Article? @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  articleId Int?
+  userId    Int //   댓글 쓴 유저 id
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  productId Int?
+  product   Product? @relation(fields: [productId], references: [id])
+  articleId Int?
+  article   Article? @relation(fields: [articleId], references: [id])
+  createdAt DateTime @default(now())
+}
